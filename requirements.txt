@@ -2,3 +2,5 @@ urllib3
 rich
 fastapi[standard]
 uvicorn[standard]
+gunicorn
+openai

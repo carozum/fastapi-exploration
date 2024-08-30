@@ -1,6 +1,10 @@
 # pip install "fastapi[standard]"
+
+# ####### run a fastAPI app
 # in dev mode : fastapi dev scripts/test-fastapi-simple.py
 # http://127.0.0.1:8000/generate_name
+
+# ######### test the API using the auto documentation
 # http://127.0.0.1:8000/docs
 
 # in production mode : fastapi run
@@ -13,7 +17,7 @@ import fastapi
 # create a fastapi app
 app = fastapi.FastAPI()
 
-# define the main route
+# define the main routes
 
 
 @app.get("/")
@@ -53,6 +57,7 @@ async def generate_name_2(
 
 ############################################################
 # handling post requests
+# https://fastapi.tiangolo.com/tutorial/body/?h=request+body
 
 
 class NameRequests(BaseModel):

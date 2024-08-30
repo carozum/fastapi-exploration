@@ -1,16 +1,7 @@
- https://aka.ms/PWA-Series 
-https://www.youtube.com/live/95Qwsi5cs78 
-Video Pamela Fox FastAPI
-
-Repos used : 
-aka.ms/python-web-apps-fastapi
-aka.ms/fastapi-starter
-aka.ms/fastapi-postgres-app
-aka.ms/fastapi-azure-functions
-aka.ms/fastapi-functions-apim
 
 pip install -r requirements.txt
 
+---------------------------------------------------------------------
 # HTTP HyperText Transfer Protocol
 This is what the web is built on 
 - A client sends an HTTP request
@@ -32,7 +23,8 @@ This is what the web is built on
 - 404 not found
 - 500 Server error
 
-# HTTP API
+---------------------------------------------------------------------
+# HTTP API - api-urllib3.py
 
 ## API vs HTTP API
 
@@ -44,7 +36,7 @@ Not all APIs are HTTP APIs
 ![HTTP APIs](image.png)
 
 ## HTTP API response formats
-- JSON
+- JSON (the most common)
 - XML
 - image
 ![HTTP API response format](image-1.png)
@@ -71,15 +63,17 @@ Internal APIs should still be documented and easy to use.
 pip install urllib3 rich
 test-urllib3.py
 
+---------------------------------------------------------------------
+# Building an HTTP API with FastAPI - api-simple.py
 
-# Building an HTTP API with FastAPI
+https://fastapi.tiangolo.com/ fastapi documentation
 
 FastAPI is a python framework designed specifically for building HTTP APIs. 
 - fast to build and fast to execute, built on async instead of sync
 - relies on python types (via pydantic)
 - auto-generated documentation via swagger-UI
-- based on the openAI specification. 
-s
+- based on the openAI specifications (OAS)
+
 fastapi app are by default async. An all the routes of the API are async functions. An async function is also known as a coroutine. It is very important for enabling concurrency meaning that when we are running our async app, it is easier ofr a server to handle multiple users because, it can pause while it is doing like some IO and then it can handle another user. 
 The function is decorated with the name of the app, the verb (get) and the route. 
 
@@ -97,26 +91,39 @@ test > try it out > execute : it is using the swagger UI documentation
 
 ## adding a parameter
 
-when adding a parameter, you need to add a type annotation because fastapi is built on type annotations ! Also need to precise if the parameter is optional. Needed to do API validation and API documentation. 
+when adding a parameter, you need to add a *type annotation* because fastapi is built on type annotations ! Also need to precise if the parameter is optional. Needed to do API validation and API documentation. Automatic API validation and error handling using types. 
+
+## response format 
+Could be JSON (the most common). But could also be an image or plain text...
+for Json : ```return {"name": random_name}```
+for plain text : ```return fastapi.responses.PlainTextResponses(random_name)```
+for XML : ```return fastapi.responses.PlainTextResponses(f"<name>{random_name}</name>, media_type="application/xml")``` adn add -> str
+
+## pydantic 
+pydantic is used for the type annotation under the scene and for post requests to create the data model (BaseModel). 
 
 ## using get or post
-Get is OK for public information as the parameters are passed in the URL
---> parameters are in the fonction definition parameters
+Get is OK for public information as the parameters are passed in the URL as query parameters
+--> parameters are in the route definition parameters
 --> request URL : http://127.0.0.1:8000/generate_name_2?starts_with=m&min_length=7  
 
 post is better for sensitive data as the parameter are passed in the body of the request. For a chat for example, the route should be a post as we don't want the conversation with the user to be public. 
---> parameters are in the request body
+--> parameters are in the request body using BaseModel to define.
 ![request URL post](image-3.png)
 --> request URL : http://127.0.0.1:8000/generate_name_2
 --> request body : {"starts_with":"m", "min_length":7}
 
 If there is any doubt, use post. 
 
+## pass files to the API (file upload)
+https://fastapi.tiangolo.com/tutorial/request-files/ 
 
+---------------------------------------------------------------------
 # Productionizing FastAPI apps
+
 For production, you'll need a server that can handle : 
 - handle ASGI (async) apps
-- process multiple requests concurrently
+- process multiple requests concurrently 
 
 Options : 
 - Gunicorn (WSGI + ASGI*)
@@ -125,11 +132,88 @@ Options :
 
 ## Uvicorn
 Uvicorn is a production level server specifically for Asgi apps. As of version 0.30.0 uvicorn can handle multiple workers. 
+- run pip install uvicorn[standard]
 - add :  uvicorn[standard] to requirements.txt 
 - and run : uvicorn scripts.test-fastapi-simple:app --workers 4 --port 8000
 
+## gunicorn
+gunicorn in a production-level server that can run multiple worker processes. 
+- run pip install uvicorn[standard] gunicorn
+- add uvicorn[standard] to requirements.txt
+- add gunicorn to requirements.txt
+- python3 -m gunicorn scripts.test-fastapi-simple:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+You have to tell it what wirker to work with.
 
+When we are using gunicorn, we want to configure it in gunicorn.conf.py, to have an easier command : 
+```python3 -m gunicorn scripts.test-fastapi-simple:app```
+
+Similar with uvicorn, you can configure
+
+
+---------------------------------------------------------------------
+# api-translation.py
+
+Using openAI api to create a translation API
+enter a text to translate and output the translated text
+
+
+
+---------------------------------------------------------------------
+# api-model.py
+![building ML server API](image-5.png)
+The server can gives 2 kinds of services to the client : 
+1. running procedures on the server (ex: provide a sentiment analysis API for Azure ML)
+2. access remote databases (ex: Twitter, NY times API)
+
+![request/response model](image-6.png)
+Input validation : via request model
+output validation : via response model
+
+Allow only specific clients to use our API and control aver the number of requests per time:
+![authentication and throttling](image-8.png)
+
+
+---------------------------------------------------------------------
+# Full stack fastAPI - api-fullstack.py
+
+Meaning using fastAPI For all your app !
+
+## fastAPI + jinja 2
+https://aka.ms/fastapi-postgres-app
+https://github.com/Azure-Samples/azure-fastapi-postgres-flexible-services 
+
+python3 -m uvicorn scripts.test-fullstack-fastapi:app --reload --port=8000
+
+Example of a fast API page even though it is only serving HTML because not of the routes are actually an API as there are no parameters and are not returning Json. 
+
+## use flask API with a database
+
+
+---------------------------------------------------------------------
 # Best practices
 Cool library
 rich library to print the result of a JSON
 rich.print(response) # formats all the JSON
+
+---------------------------------------------------------------------
+# sources 
+https://www.datacamp.com/tutorial/introduction-fastapi-tutorial
+https://www.datacamp.com/tutorial/serving-an-llm-application-as-an-api-endpoint-using-fastapi-in-python 
+https://www.datacamp.com/tutorial/python-backend-development
+
+https://www.datacamp.com/tutorial/making-http-requests-in-python
+
+Video Pamela Fox FastAPI
+https://aka.ms/PWA-Series 
+https://www.youtube.com/live/95Qwsi5cs78 
+
+Repos used : 
+aka.ms/python-web-apps-fastapi
+aka.ms/fastapi-starter
+aka.ms/fastapi-postgres-app
+aka.ms/fastapi-azure-functions
+aka.ms/fastapi-functions-apim
+
+A reprendre :
+https://www.youtube.com/watch?v=rkPIftzu1pQ 
+https://app.datacamp.com/learn/courses/large-language-models-llms-concepts 
