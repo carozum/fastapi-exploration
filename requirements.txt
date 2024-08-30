@@ -4,3 +4,4 @@ fastapi[standard]
 uvicorn[standard]
 gunicorn
 openai
+jwt

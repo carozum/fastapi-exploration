@@ -2,6 +2,7 @@ from fastapi import FastAPI
 import models
 from database import engine
 from routers import books, readers, loans
+from auth import authentication
 
 from routers import books, readers, loans
 
@@ -9,6 +10,7 @@ app = FastAPI()
 app.include_router(readers.router)
 app.include_router(books.router)
 app.include_router(loans.router)
+app.include_router(authentication.router)
 
 
 @app.get("/")
